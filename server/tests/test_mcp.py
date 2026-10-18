@@ -95,46 +95,48 @@ async def test_dashboard_resource_is_linked_and_has_mcp_app_mime_type(tmp_path):
 async def test_http_metadata_is_public_but_mcp_requires_valid_access_token(tmp_path):
     mcp, key = make_server(tmp_path)
     app = mcp.http_app(path="/mcp", stateless_http=True, json_response=True)
-    async with app.router.lifespan_context(app):
-        async with httpx.AsyncClient(
+    async with (
+        app.router.lifespan_context(app),
+        httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="https://replication-demo.example.com"
-        ) as client:
-            response = await client.get("/.well-known/oauth-protected-resource/mcp")
-            assert response.status_code == 200
-            assert response.json()["scopes_supported"][0].endswith("/Replication.Read")
-            initialize = {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "initialize",
-                "params": {
-                    "protocolVersion": "2025-06-18",
-                    "capabilities": {},
-                    "clientInfo": {"name": "test", "version": "1"},
-                },
-            }
-            headers = {"Accept": "application/json, text/event-stream"}
-            for method in ("tools/list", "resources/read"):
-                response = await client.post(
-                    "/mcp",
-                    json={
-                        "jsonrpc": "2.0",
-                        "id": 2,
-                        "method": method,
-                        "params": {},
-                    },
-                    headers=headers,
-                )
-                assert response.status_code == 401
+        ) as client,
+    ):
+        response = await client.get("/.well-known/oauth-protected-resource/mcp")
+        assert response.status_code == 200
+        assert response.json()["scopes_supported"][0].endswith("/Replication.Read")
+        initialize = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-06-18",
+                "capabilities": {},
+                "clientInfo": {"name": "test", "version": "1"},
+            },
+        }
+        headers = {"Accept": "application/json, text/event-stream"}
+        for method in ("tools/list", "resources/read"):
             response = await client.post(
                 "/mcp",
-                json=initialize,
-                headers={
-                    **headers,
-                    "Authorization": f"Bearer {token(key)}",
+                json={
+                    "jsonrpc": "2.0",
+                    "id": 2,
+                    "method": method,
+                    "params": {},
                 },
+                headers=headers,
             )
-            assert response.status_code == 200
-            assert "serverInfo" in response.json()["result"]
+            assert response.status_code == 401
+        response = await client.post(
+            "/mcp",
+            json=initialize,
+            headers={
+                **headers,
+                "Authorization": f"Bearer {token(key)}",
+            },
+        )
+        assert response.status_code == 200
+        assert "serverInfo" in response.json()["result"]
 
 
 def test_missing_dashboard_build_fails_explicitly(tmp_path):
