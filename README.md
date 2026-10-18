@@ -172,6 +172,8 @@ CORS permits only
 The MCP App bundles all scripts/styles, has empty outbound resource/connect
 allowlists, and calls tools only through the host bridge. No CDN, direct data
 HTTP fetch, browser token storage, or database connection is used.
+JSON Schema validators are generated at build time, so dashboard initialization
+and validation do not require CSP `unsafe-eval`.
 
 ## Agents Toolkit and official WIQD lifecycle
 
@@ -218,8 +220,11 @@ npm run build
 Pop-Location
 ```
 
-Local evidence: Python domain/JWT/MCP/configuration tests, frontend behavior/
-schema tests, and official WIQD offline static validation/package. Cryptographic
+Observed local evidence: **53 Python tests**, **13 frontend tests**, type/schema
+and lint checks, single-file production build, and official WIQD offline static
+validation/package. A real local server process returned **200** for public
+metadata and **401** for an unauthenticated MCP call, then was stopped.
+That smoke check used synthetic configuration. Cryptographic
 tests use locally signed RSA tokens, not real tenant tokens. The dependency emits
 an Authlib deprecation warning; bundling reports third-party Zod comment
 annotation warnings. Neither is hidden. Live OAuth/SSO and Copilot UI acceptance
