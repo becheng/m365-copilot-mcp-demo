@@ -1,0 +1,25 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.8/schema.json",
+    "version": "v1.8",
+    "name": "Replication Insights${{APP_NAME_SUFFIX}}",
+    "description": "Explore simulated database replication freshness, service health, capacity, incidents, and trends.",
+    "instructions": "$[file('instruction.txt')]",
+    "conversation_starters": [
+        {
+            "title": "Open dashboard",
+            "text": "Show the replication insights dashboard for the lagging demo scenario."
+        },
+        {
+            "title": "Find stale databases",
+            "text": "Which databases are stale in the lagging scenario, and why?"
+        },
+        {
+            "title": "Investigate an outage",
+            "text": "Explain the unhealthy replication service and related incidents in the outage scenario."
+        },
+        {
+            "title": "Review capacity",
+            "text": "Which databases need attention in the capacity scenario? Show storage and throughput trends."
+        }
+    ]
+}

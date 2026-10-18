@@ -1,0 +1,12 @@
+{
+  "lspServers": {
+    "wiqd": {
+      "command": "wiqd",
+      "args": ["agent", "lsp"],
+      "fileExtensions": {
+        ".json": "json"
+      },
+      "rootUri": "."
+    }
+  }
+}
