@@ -7,6 +7,9 @@ environmentFolderPath: ./env
 
 # Triggered when 'teamsapp provision' is executed
 provision:
+  - uses: script
+    with:
+      run: ..\server\.venv\Scripts\python.exe ..\scripts\check-config.py --env ${{TEAMSFX_ENV}} --before-provision
   # Creates an app
   - uses: teamsApp/create
     with:
@@ -16,6 +19,17 @@ provision:
     # the specified environment variable(s).
     writeToEnvironmentFile:
       teamsAppId: TEAMS_APP_ID
+  - uses: oauth/register
+    with:
+      name: replicatio
+      appId: ${{TEAMS_APP_ID}}
+      flow: authorizationCode
+      identityProvider: MicrosoftEntra
+      baseUrl: ${{MCP_PUBLIC_BASE_URL}}/mcp
+      clientId: ${{MCP_DA_OAUTH_CLIENT_ID_REPLICATIO}}
+      scope: ${{MCP_RESOURCE_SCOPE}}
+    writeToEnvironmentFile:
+      configurationId: MCP_DA_AUTH_ID_REPLICATIO
 
   # Build app package with latest env value
   - uses: teamsApp/zipAppPackage

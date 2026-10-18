@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Dashboard: build",
+      "type": "shell",
+      "command": "npm run build",
+      "options": { "cwd": "${workspaceFolder}\\dashboard" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Configuration: check",
+      "type": "process",
+      "command": "${workspaceFolder}\\server\\.venv\\Scripts\\python.exe",
+      "args": ["${workspaceFolder}\\scripts\\check-config.py"],
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: run protected server",
+      "type": "process",
+      "command": "${workspaceFolder}\\server\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "replication_insights.server"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "dependsOn": ["Dashboard: build", "Configuration: check"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "Tunnel: host existing tunnel",
+      "type": "process",
+      "command": "devtunnel",
+      "args": ["host", "${input:tunnelId}"],
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "WIQD: validate offline structure",
+      "type": "shell",
+      "command": "& '..\\scripts\\wiqd.ps1' agent validate --path . --env offline --json --skill wiqd --workflow wiqd-core",
+      "options": { "cwd": "${workspaceFolder}\\agent" },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    { "id": "tunnelId", "type": "promptString", "description": "Existing stable Dev Tunnel ID" }
+  ]
+}

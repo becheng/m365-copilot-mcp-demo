@@ -154,3 +154,13 @@ it("ignores a stale scenario error after a newer response succeeds", async () =>
   expect(root.textContent).not.toContain("Old request failed");
   expect(root.textContent).toContain("v1:capacity:");
 });
+
+it("does not filter the previous snapshot while a new scenario is loading", () => {
+  bridge.initial(payload());
+  bridge.dashboard = () => new Promise(() => {});
+  change("scenario", "outage");
+  change("status-filter", "critical");
+  expect(bridge.requests).toHaveLength(1);
+  expect(root.querySelector("[data-database='orders']")).toBeNull();
+  expect(root.querySelector<HTMLSelectElement>("#status-filter")?.disabled).toBe(true);
+});

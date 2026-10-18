@@ -1,0 +1,21 @@
+{
+  "servers": {
+    "replication-insights-development": {
+      "type": "http",
+      "url": "${input:mcpPublicBaseUrl}/mcp",
+      "oauth": { "clientId": "${input:developmentClientId}" }
+    }
+  },
+  "inputs": [
+    {
+      "id": "mcpPublicBaseUrl",
+      "type": "promptString",
+      "description": "Exact MCP_PUBLIC_BASE_URL from root .env (HTTPS origin, no trailing slash)"
+    },
+    {
+      "id": "developmentClientId",
+      "type": "promptString",
+      "description": "DEV_OAUTH_CLIENT_ID: separate Entra public client, not the API app"
+    }
+  ]
+}

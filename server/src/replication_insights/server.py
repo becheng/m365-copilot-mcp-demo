@@ -9,6 +9,7 @@ from fastmcp.server.auth import RemoteAuthProvider
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
+from .audit import AuditMiddleware
 from .auth import build_auth, load_auth_settings
 from .insights import InsightsService
 from .mock_data import SCENARIOS
@@ -39,6 +40,7 @@ def create_server(
             f"Missing dashboard bundle: {dashboard_html}. Run npm --prefix dashboard run build."
         )
     mcp = FastMCP("Replication Insights - Demo / simulated data", auth=auth)
+    mcp.add_middleware(AuditMiddleware())
 
     @mcp.tool(annotations=READ_ONLY)
     def list_demo_scenarios() -> ScenarioCatalogue:

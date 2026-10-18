@@ -1,3 +1,5 @@
+import json
+import logging
 from datetime import UTC, datetime
 
 import httpx
@@ -146,3 +148,48 @@ def test_missing_dashboard_build_fails_explicitly(tmp_path):
 
     with pytest.raises(FileNotFoundError, match="dashboard"):
         create_server(InsightsService(), build_auth(settings()), tmp_path / "missing.html")
+
+
+async def test_tool_audit_logs_have_safe_context_timing_and_errors(tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger="replication_insights.audit")
+    mcp, _ = make_server(tmp_path)
+    async with Client(mcp) as client:
+        await client.call_tool("get_estate_summary", {"request": {"scenario_id": "healthy"}})
+        with pytest.raises(ToolError):
+            await client.call_tool(
+                "get_database_details",
+                {
+                    "request": {"scenario_id": "outage"},
+                    "database_id": "do-not-log-arguments",
+                },
+            )
+    events = [
+        json.loads(record.message)
+        for record in caplog.records
+        if record.name == "replication_insights.audit"
+    ]
+    assert len(events) == 2
+    assert events[0]["tool"] == "get_estate_summary"
+    assert events[0]["scenario_id"] == "healthy"
+    assert events[0]["snapshot_id"] == "v1:healthy:1792357200"
+    assert events[0]["outcome"] == "success"
+    assert events[1]["outcome"] != "success"
+    assert all(event["duration_ms"] >= 0 and event["correlation_id"] for event in events)
+    assert events[0]["correlation_id"] != events[1]["correlation_id"]
+    assert "do-not-log-arguments" not in json.dumps(events)
+
+
+async def test_invalid_scenario_shape_does_not_break_error_auditing(tmp_path, caplog):
+    caplog.set_level(logging.INFO, logger="replication_insights.audit")
+    mcp, _ = make_server(tmp_path)
+    async with Client(mcp) as client:
+        with pytest.raises(ToolError, match="scenario_id"):
+            await client.call_tool("get_estate_summary", {"request": {"scenario_id": {}}})
+    events = [
+        json.loads(record.message)
+        for record in caplog.records
+        if record.name == "replication_insights.audit"
+    ]
+    assert len(events) == 1
+    assert events[0]["scenario_id"] is None
+    assert events[0]["outcome"] != "success"

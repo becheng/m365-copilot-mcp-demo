@@ -148,6 +148,8 @@ export function mountDashboard(root: HTMLElement, bridge: DashboardBridge): void
     get<HTMLSelectElement>("scenario").value = value.scenario_id;
     get<HTMLSelectElement>("status-filter").value = "";
     get<HTMLSelectElement>("environment-filter").value = "";
+    get<HTMLSelectElement>("status-filter").disabled = false;
+    get<HTMLSelectElement>("environment-filter").disabled = false;
     get("snapshot").textContent = `As of ${value.as_of} · ${value.snapshot_id}`;
     get("details").hidden = true;
     const summary = get("summary");
@@ -206,6 +208,14 @@ export function mountDashboard(root: HTMLElement, bridge: DashboardBridge): void
       errorMessage(new Error("Unknown scenario")); return;
     }
     const scenario_id = scenario as SnapshotRequest["scenario_id"];
+    state = undefined;
+    get("details").hidden = true;
+    get("summary").replaceChildren();
+    get("databases").replaceChildren();
+    get("snapshot").textContent = "";
+    get("count").textContent = "";
+    get<HTMLSelectElement>("status-filter").disabled = true;
+    get<HTMLSelectElement>("environment-filter").disabled = true;
     void run(() => bridge.callTool("show_dashboard", { request: { scenario_id } }), renderDashboard);
   }
   function filter() {

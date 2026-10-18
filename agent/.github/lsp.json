@@ -1,8 +1,8 @@
 {
   "lspServers": {
     "wiqd": {
-      "command": "wiqd",
-      "args": ["agent", "lsp"],
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "..\\scripts\\wiqd.ps1", "agent", "lsp"],
       "fileExtensions": {
         ".json": "json"
       },
