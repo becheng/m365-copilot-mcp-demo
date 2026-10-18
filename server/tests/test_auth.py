@@ -19,14 +19,14 @@ def signing_key():
 def settings(**changes):
     from replication_insights.auth import AuthSettings
 
-    values = dict(
-        tenant_id=UUID(TENANT),
-        api_client_id=UUID(API),
-        accepted_audiences=[API, f"api://{API}"],
-        identifier_uri=f"api://{API}",
-        required_scope="Replication.Read",
-        public_base_url="https://replication-demo.example.com",
-    )
+    values = {
+        "tenant_id": UUID(TENANT),
+        "api_client_id": UUID(API),
+        "accepted_audiences": [API, f"api://{API}"],
+        "identifier_uri": f"api://{API}",
+        "required_scope": "Replication.Read",
+        "public_base_url": "https://replication-demo.example.com",
+    }
     return AuthSettings(_env_file=None, **(values | changes))
 
 
@@ -40,20 +40,17 @@ def verifier(signing_key):
 
 
 def token(signing_key, **changes):
-    claims = (
-        dict(
-            iss=f"https://login.microsoftonline.com/{TENANT}/v2.0",
-            aud=API,
-            tid=TENANT,
-            ver="2.0",
-            exp=int(time.time()) + 3600,
-            nbf=int(time.time()) - 10,
-            scp="Replication.Read",
-            azp="development-client",
-            sub="demo-user",
-        )
-        | changes
-    )
+    claims = {
+        "iss": f"https://login.microsoftonline.com/{TENANT}/v2.0",
+        "aud": API,
+        "tid": TENANT,
+        "ver": "2.0",
+        "exp": int(time.time()) + 3600,
+        "nbf": int(time.time()) - 10,
+        "scp": "Replication.Read",
+        "azp": "development-client",
+        "sub": "demo-user",
+    } | changes
     return jwt.encode(
         {key: value for key, value in claims.items() if value is not None},
         signing_key,
