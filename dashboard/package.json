@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate:contracts": "json2ts -i schemas/responses.json -o src/contracts.ts",
-    "check:contracts": "node scripts/check-contracts.mjs",
+    "generate:contracts": "node scripts/contracts.mjs",
+    "check:contracts": "node scripts/contracts.mjs --check",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "build": "vite build"

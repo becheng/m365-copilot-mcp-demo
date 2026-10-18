@@ -12,6 +12,36 @@ def service():
     return InsightsService(clock=lambda: AS_OF)
 
 
+@pytest.mark.parametrize(
+    "metric",
+    [
+        "lag_seconds",
+        "throughput_mib_per_second",
+        "storage_used_gib",
+    ],
+)
+def test_history_windows_agree_at_overlapping_snapshot_timestamps(metric):
+    from replication_insights.models import HistoryQuery
+
+    histories = [
+        service().history(
+            HistoryQuery(
+                scenario_id="lagging",
+                snapshot_id="v1:lagging:1792357200",
+                database_id="orders",
+                metric=metric,
+                hours=hours,
+            )
+        )
+        for hours in (1, 6, 24)
+    ]
+    canonical = {point.at: point.value for point in histories[-1].points}
+    for history in histories[:-1]:
+        overlap = [point for point in history.points if point.at in canonical]
+        assert len(overlap) >= 2
+        assert all(point.value == canonical[point.at] for point in overlap)
+
+
 def test_repeatable_snapshots_and_scenario_isolation():
     from replication_insights.models import SnapshotRequest
 

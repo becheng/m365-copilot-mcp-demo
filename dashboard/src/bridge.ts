@@ -1,7 +1,6 @@
 import { App } from "@modelcontextprotocol/ext-apps";
-import Ajv2020 from "ajv/dist/2020";
-import addFormats from "ajv-formats";
-import schema from "../schemas/responses.json";
+import type { ValidateFunction } from "ajv";
+import * as generated from "./generated/validators.js";
 import type {
   DashboardPayload, DatabaseDetails, DatabasePage, DatabaseQuery, EstateSummary,
   HistoryQuery, IncidentPage, MetricHistory, ScenarioCatalogue, SnapshotRequest,
@@ -30,25 +29,25 @@ export interface DashboardBridge {
   ): Promise<ToolContracts[K]["result"]>;
 }
 
-const definitionNames: Record<keyof ToolContracts, string> = {
-  list_demo_scenarios: "ScenarioCatalogue", get_estate_summary: "EstateSummary",
-  list_databases: "DatabasePage", get_database_details: "DatabaseDetails",
-  get_metric_history: "MetricHistory", list_incidents: "IncidentPage",
-  show_dashboard: "DashboardPayload",
+const validators: {
+  [K in keyof ToolContracts]: ValidateFunction<ToolContracts[K]["result"]>;
+} = {
+  list_demo_scenarios: generated.ScenarioCatalogue,
+  get_estate_summary: generated.EstateSummary,
+  list_databases: generated.DatabasePage,
+  get_database_details: generated.DatabaseDetails,
+  get_metric_history: generated.MetricHistory,
+  list_incidents: generated.IncidentPage,
+  show_dashboard: generated.DashboardPayload,
 };
-const ajv = new Ajv2020({ strict: false, allErrors: true });
-addFormats(ajv);
-ajv.addSchema(schema, "public");
-const references = Object.fromEntries(Object.entries(definitionNames).map(
-  ([name, definition]) => [name, { $ref: `public#/$defs/${definition}` }],
-));
 
 export function decodeResult<K extends keyof ToolContracts>(
   name: K, value: unknown,
 ): ToolContracts[K]["result"] {
-  const validate = ajv.compile<ToolContracts[K]["result"]>(references[name]);
+  const validate = validators[name];
   if (!validate(value)) {
-    throw new Error(`Invalid ${name} response: ${ajv.errorsText(validate?.errors)}`);
+    const reason = validate.errors?.map((error) => `${error.instancePath} ${error.message}`).join("; ");
+    throw new Error(`Invalid ${name} response: ${reason}`);
   }
   if (value.simulated !== true) throw new Error("Response is not marked as simulated data");
   const parsed: ToolContracts[keyof ToolContracts]["result"] = value;

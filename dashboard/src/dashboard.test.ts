@@ -32,6 +32,8 @@ class FakeBridge implements DashboardBridge {
   requests: { name: string; args: unknown }[] = [];
   dashboard: (scenario: DashboardPayload["scenario_id"]) => Promise<DashboardPayload> =
     async (scenario) => payload(scenario);
+  databasePage: () => Promise<DashboardPayload["databases"]> = async () =>
+    ({ ...payload().databases, items: [], total: 0 });
 
   connect = async () => {};
   onInitialResult(handler: (value: DashboardPayload) => void) { this.initial = handler; }
@@ -45,7 +47,7 @@ class FakeBridge implements DashboardBridge {
       const input = args as ToolContracts["show_dashboard"]["args"];
       result = await this.dashboard(input.request.scenario_id);
     } else if (name === "list_databases") {
-      result = { ...data.databases, items: [], total: 0 };
+      result = await this.databasePage();
     } else if (name === "get_database_details") {
       result = { scenario_id: data.scenario_id, snapshot_id: data.snapshot_id,
         as_of: data.as_of, simulated: true, database: data.databases.items[0], incidents: [] };
@@ -163,4 +165,17 @@ it("does not filter the previous snapshot while a new scenario is loading", () =
   expect(bridge.requests).toHaveLength(1);
   expect(root.querySelector("[data-database='orders']")).toBeNull();
   expect(root.querySelector<HTMLSelectElement>("#status-filter")?.disabled).toBe(true);
+});
+
+it("prevents stale-row drilldown from cancelling a pending filter result", async () => {
+  bridge.initial(payload());
+  let resolveFilter!: (value: DashboardPayload["databases"]) => void;
+  bridge.databasePage = () => new Promise((resolve) => { resolveFilter = resolve; });
+  change("status-filter", "critical");
+  const staleRow = root.querySelector<HTMLButtonElement>("[data-database='orders']")!;
+  expect(staleRow.disabled).toBe(true);
+  staleRow.click();
+  resolveFilter({ ...payload().databases, items: [], total: 0 });
+  await vi.waitFor(() => expect(root.textContent).toContain("No databases match"));
+  expect(bridge.requests.some((request) => request.name === "get_database_details")).toBe(false);
 });

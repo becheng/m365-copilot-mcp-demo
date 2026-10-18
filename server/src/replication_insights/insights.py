@@ -177,7 +177,9 @@ class InsightsService:
         points = [
             MetricPoint(
                 at=details.as_of - timedelta(hours=query.hours * (24 - index) / 24),
-                value=None if current is None else round(current * (0.25 + 0.75 * index / 24), 3),
+                value=None
+                if current is None
+                else round(current * (1 - 0.75 * query.hours * (24 - index) / (24 * 24)), 3),
             )
             for index in range(25)
         ]

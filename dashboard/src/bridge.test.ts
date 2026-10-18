@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import { decodeResult } from "./bridge";
 
 it("rejects a dashboard whose nested reference times disagree", () => {
@@ -22,4 +22,16 @@ it("rejects malformed tool results at the bridge boundary", () => {
 it("requires the explicit simulated-data marker", () => {
   expect(() => decodeResult("list_demo_scenarios", { scenarios: [] }))
     .toThrow("not marked as simulated");
+});
+
+it("initializes and validates without runtime code generation under a strict CSP", async () => {
+  vi.resetModules();
+  const blocked = vi.spyOn(globalThis, "Function").mockImplementation(() => {
+    throw new EvalError("Code generation from strings disallowed");
+  });
+  try {
+    const bridge = await import("./bridge");
+    expect(bridge.decodeResult("list_demo_scenarios", { simulated: true, scenarios: [] }))
+      .toEqual({ simulated: true, scenarios: [] });
+  } finally { blocked.mockRestore(); }
 });

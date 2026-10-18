@@ -227,6 +227,8 @@ export function mountDashboard(root: HTMLElement, bridge: DashboardBridge): void
       environment: environment ? environment as "production" | "staging" : null, offset: 0, limit: 20,
     };
     get("details").hidden = true;
+    get("databases").querySelectorAll<HTMLButtonElement>("[data-database]")
+      .forEach((button) => { button.disabled = true; });
     void run(() => bridge.callTool("list_databases", { query }), renderPage);
   }
   get("scenario").addEventListener("change", changeScenario);
