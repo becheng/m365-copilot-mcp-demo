@@ -29,8 +29,8 @@
     {
       "label": "Tunnel: host existing tunnel",
       "type": "process",
-      "command": "devtunnel",
-      "args": ["host", "${input:tunnelId}"],
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}\\scripts\\devtunnel.ps1", "host", "${input:tunnelId}", "--origin-header", "unchanged"],
       "problemMatcher": [],
       "presentation": { "reveal": "always", "panel": "dedicated" }
     },
