@@ -1,0 +1,846 @@
+{
+  "$defs": {
+    "DashboardPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "summary": {
+          "$ref": "#/$defs/EstateSummary"
+        },
+        "databases": {
+          "$ref": "#/$defs/DatabasePage"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "summary",
+        "databases"
+      ],
+      "title": "DashboardPayload",
+      "type": "object"
+    },
+    "DatabaseDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "database": {
+          "$ref": "#/$defs/DatabaseRecord"
+        },
+        "incidents": {
+          "items": {
+            "$ref": "#/$defs/Incident"
+          },
+          "title": "Incidents",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "database",
+        "incidents"
+      ],
+      "title": "DatabaseDetails",
+      "type": "object"
+    },
+    "DatabasePage": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DatabaseRecord"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "items",
+        "total",
+        "offset",
+        "limit"
+      ],
+      "title": "DatabasePage",
+      "type": "object"
+    },
+    "DatabaseQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Id"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "healthy",
+                "warning",
+                "critical",
+                "unknown"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "enum": [
+                "production",
+                "staging"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Environment"
+        },
+        "offset": {
+          "default": 0,
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 20,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scenario_id"
+      ],
+      "title": "DatabaseQuery",
+      "type": "object"
+    },
+    "DatabaseRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "engine": {
+          "title": "Engine",
+          "type": "string"
+        },
+        "replication_method": {
+          "title": "Replication Method",
+          "type": "string"
+        },
+        "environment": {
+          "enum": [
+            "production",
+            "staging"
+          ],
+          "title": "Environment",
+          "type": "string"
+        },
+        "expected_sync_interval_seconds": {
+          "exclusiveMinimum": 0,
+          "title": "Expected Sync Interval Seconds",
+          "type": "integer"
+        },
+        "last_success_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Success At"
+        },
+        "lag_seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lag Seconds"
+        },
+        "service_health": {
+          "enum": [
+            "running",
+            "degraded",
+            "failed",
+            "unknown"
+          ],
+          "title": "Service Health",
+          "type": "string"
+        },
+        "storage_used_gib": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Storage Used Gib"
+        },
+        "storage_allocated_gib": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Storage Allocated Gib"
+        },
+        "throughput_mib_per_second": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Throughput Mib Per Second"
+        },
+        "failed_runs_24h": {
+          "minimum": 0,
+          "title": "Failed Runs 24H",
+          "type": "integer"
+        },
+        "health": {
+          "additionalProperties": {
+            "$ref": "#/$defs/HealthDimension"
+          },
+          "title": "Health",
+          "type": "object"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "healthy",
+            "warning",
+            "critical",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "source",
+        "target",
+        "engine",
+        "replication_method",
+        "environment",
+        "expected_sync_interval_seconds",
+        "last_success_at",
+        "lag_seconds",
+        "service_health",
+        "storage_used_gib",
+        "storage_allocated_gib",
+        "throughput_mib_per_second",
+        "failed_runs_24h"
+      ],
+      "title": "DatabaseRecord",
+      "type": "object"
+    },
+    "EstateSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "total_databases": {
+          "title": "Total Databases",
+          "type": "integer"
+        },
+        "health_counts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Health Counts",
+          "type": "object"
+        },
+        "stale_databases": {
+          "title": "Stale Databases",
+          "type": "integer"
+        },
+        "failed_runs_24h": {
+          "title": "Failed Runs 24H",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "total_databases",
+        "health_counts",
+        "stale_databases",
+        "failed_runs_24h"
+      ],
+      "title": "EstateSummary",
+      "type": "object"
+    },
+    "HealthDimension": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "healthy",
+            "warning",
+            "critical",
+            "unknown"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "reason"
+      ],
+      "title": "HealthDimension",
+      "type": "object"
+    },
+    "HistoryQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Id"
+        },
+        "database_id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Database Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "lag_seconds",
+            "throughput_mib_per_second",
+            "storage_used_gib"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "hours": {
+          "default": 24,
+          "enum": [
+            1,
+            6,
+            24
+          ],
+          "title": "Hours",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "database_id",
+        "metric"
+      ],
+      "title": "HistoryQuery",
+      "type": "object"
+    },
+    "Incident": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "database_id": {
+          "title": "Database Id",
+          "type": "string"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "healthy",
+            "warning",
+            "critical",
+            "unknown"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "database_id",
+        "at",
+        "severity",
+        "title",
+        "description"
+      ],
+      "title": "Incident",
+      "type": "object"
+    },
+    "IncidentPage": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Incident"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "items"
+      ],
+      "title": "IncidentPage",
+      "type": "object"
+    },
+    "MetricHistory": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "as_of": {
+          "format": "date-time",
+          "title": "As Of",
+          "type": "string"
+        },
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "database_id": {
+          "title": "Database Id",
+          "type": "string"
+        },
+        "metric": {
+          "enum": [
+            "lag_seconds",
+            "throughput_mib_per_second",
+            "storage_used_gib"
+          ],
+          "title": "Metric",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "hours": {
+          "title": "Hours",
+          "type": "integer"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/MetricPoint"
+          },
+          "title": "Points",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenario_id",
+        "snapshot_id",
+        "as_of",
+        "database_id",
+        "metric",
+        "unit",
+        "hours",
+        "points"
+      ],
+      "title": "MetricHistory",
+      "type": "object"
+    },
+    "MetricPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "at",
+        "value"
+      ],
+      "title": "MetricPoint",
+      "type": "object"
+    },
+    "ScenarioCatalogue": {
+      "additionalProperties": false,
+      "properties": {
+        "simulated": {
+          "const": true,
+          "default": true,
+          "title": "Simulated",
+          "type": "boolean"
+        },
+        "scenarios": {
+          "items": {
+            "$ref": "#/$defs/ScenarioDescriptor"
+          },
+          "title": "Scenarios",
+          "type": "array"
+        }
+      },
+      "required": [
+        "scenarios"
+      ],
+      "title": "ScenarioCatalogue",
+      "type": "object"
+    },
+    "ScenarioDescriptor": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
+      "title": "ScenarioDescriptor",
+      "type": "object"
+    },
+    "SnapshotRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "scenario_id": {
+          "enum": [
+            "healthy",
+            "lagging",
+            "outage",
+            "capacity"
+          ],
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Id"
+        }
+      },
+      "required": [
+        "scenario_id"
+      ],
+      "title": "SnapshotRequest",
+      "type": "object"
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#/$defs/DashboardPayload"
+    },
+    {
+      "$ref": "#/$defs/DatabaseDetails"
+    },
+    {
+      "$ref": "#/$defs/DatabasePage"
+    },
+    {
+      "$ref": "#/$defs/EstateSummary"
+    },
+    {
+      "$ref": "#/$defs/MetricHistory"
+    },
+    {
+      "$ref": "#/$defs/IncidentPage"
+    },
+    {
+      "$ref": "#/$defs/ScenarioCatalogue"
+    },
+    {
+      "$ref": "#/$defs/SnapshotRequest"
+    },
+    {
+      "$ref": "#/$defs/DatabaseQuery"
+    },
+    {
+      "$ref": "#/$defs/HistoryQuery"
+    }
+  ],
+  "title": "PublicContracts",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

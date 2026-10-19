@@ -1,0 +1,6 @@
+{
+  "folders": [
+    { "name": "Replication demo", "path": "." },
+    { "name": "M365 agent (Agents Toolkit)", "path": "agent" }
+  ]
+}

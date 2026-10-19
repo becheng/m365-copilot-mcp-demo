@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Protected replication MCP",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "replication_insights.server",
+      "python": "${workspaceFolder}\\server\\.venv\\Scripts\\python.exe",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}\\.env",
+      "console": "integratedTerminal",
+      "preLaunchTask": "Dashboard: build",
+      "justMyCode": true
+    }
+  ]
+}
