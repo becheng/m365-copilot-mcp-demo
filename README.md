@@ -4,10 +4,66 @@ A Microsoft 365 Copilot declarative agent with a local, Entra-protected Python
 FastMCP server and an embedded MCP App dashboard. **All operational data is
 simulated. No databases are created or connected.**
 
+## Quick start
+
 The agent is scaffolded and managed using the official Microsoft Work IQ Dev
 Tools (`wiqd@wiqd` from `microsoft/wiqd`). It retains VS Code Agents Toolkit
 manifests and lifecycle files. Copilot provides orchestration; there is no custom
 Agents SDK runtime.
+
+Copilot runs in Microsoft 365; the protected MCP server runs locally through a
+Dev Tunnel. For first-time setup, complete [dependency restore](#prerequisites-and-restore),
+[Entra configuration](#entra-resource-server-and-copilot-sso),
+[persistent tunnel creation](#stable-https-tunnel-and-local-server), and
+[personal agent provisioning](#agents-toolkit-and-official-wiqd-lifecycle) below.
+The commands here assume those steps are complete and root `.env` is configured.
+
+Use PowerShell 7 from the repository root in two terminals. Reuse services that
+are already running instead of starting duplicate listeners.
+
+1. **Terminal 1: start the existing Dev Tunnel.** Replace `YOUR_TUNNEL_ID` with
+   your persistent tunnel ID:
+
+   ```powershell
+   .\scripts\devtunnel.ps1 host 'YOUR_TUNNEL_ID' --origin-header unchanged
+   ```
+
+   If sign-in is needed, first run
+   `.\scripts\devtunnel.ps1 user login --entra --use-device-code-auth` using the
+   authorized development account. Confirm the port-8000 HTTPS forwarding origin
+   matches `MCP_PUBLIC_BASE_URL` in root `.env`. If it changed, complete the URL
+   and registration updates in the tunnel/Entra sections before continuing.
+
+2. **Terminal 2: build the dashboard and start the protected MCP server.**
+   The build and configuration check must succeed before starting the server:
+
+   ```powershell
+   Push-Location .\dashboard
+   try {
+       npm run build
+       if ($LASTEXITCODE -ne 0) { throw 'Dashboard build failed.' }
+   } finally {
+       Pop-Location
+   }
+   .\server\.venv\Scripts\python.exe .\scripts\check-config.py --sync-agent-env &&
+       .\server\.venv\Scripts\python.exe -m replication_insights.server
+   ```
+
+   Leave both terminals running. The server listens on `127.0.0.1:8000`;
+   Copilot reaches it at the configured public origin's `/mcp` endpoint.
+
+3. **Open the Copilot development agent.** Open
+   `https://m365.cloud.microsoft/chat?titleId=<M365_TITLE_ID>`, replacing
+   `<M365_TITLE_ID>` with the generated value in `agent\env\.env.local` or
+   `agent\env\.env.local.user`. Sign in to the configured development tenant,
+   complete any required consent, and ask **"Show the lagging replication
+   dashboard"**. The agent and inline dashboard use the local server through the
+   tunnel; all insights remain simulated.
+
+In VS Code, open `replication-insights.code-workspace` and use **Terminal: Run
+Task** to run **Tunnel: host existing tunnel** and **MCP: run protected server**
+instead of the terminal commands above. The server task builds the dashboard and
+checks configuration automatically; it does not provision or install the agent.
 
 ## What is implemented
 
